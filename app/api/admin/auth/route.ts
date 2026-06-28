@@ -52,6 +52,8 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+  } else if (process.env.NODE_ENV === 'production') {
+    console.warn('TURNSTILE_SECRET_KEY is not set in production. Admin login bot protection is disabled.');
   }
 
   const adminPassword = process.env.ADMIN_PASSWORD;

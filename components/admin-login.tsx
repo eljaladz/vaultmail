@@ -13,6 +13,7 @@ const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 export function AdminLogin() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [turnstileReset, setTurnstileReset] = useState(0);
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -41,6 +42,7 @@ export function AdminLogin() {
       toast.success('Login successful.');
       window.location.reload();
     } catch (error) {
+      setTurnstileReset((prev) => prev + 1);
       console.error(error);
       const message =
         error instanceof Error
@@ -78,7 +80,7 @@ export function AdminLogin() {
             />
             {TURNSTILE_SITE_KEY && (
               <div className="flex justify-center">
-                <TurnstileWidget siteKey={TURNSTILE_SITE_KEY} />
+                <TurnstileWidget key={turnstileReset} siteKey={TURNSTILE_SITE_KEY} />
               </div>
             )}
             <Button type="submit" disabled={loading} className="w-full">

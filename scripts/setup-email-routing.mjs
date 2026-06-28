@@ -1,6 +1,6 @@
 const API_BASE = 'https://api.cloudflare.com/client/v4';
 
-function getEnv(name: string): string {
+function getEnv(name) {
   const value = process.env[name];
   if (!value) {
     throw new Error(`Missing environment variable: ${name}`);
@@ -8,7 +8,7 @@ function getEnv(name: string): string {
   return value;
 }
 
-async function cfFetch(method: string, path: string, body?: unknown) {
+async function cfFetch(method, path, body) {
   const token = getEnv('CLOUDFLARE_API_TOKEN');
   const url = `${API_BASE}${path}`;
   const response = await fetch(url, {
@@ -20,11 +20,7 @@ async function cfFetch(method: string, path: string, body?: unknown) {
     body: body ? JSON.stringify(body) : undefined
   });
 
-  const data = (await response.json().catch(() => ({}))) as {
-    success?: boolean;
-    errors?: Array<{ message: string }>;
-    result?: unknown;
-  };
+  const data = await response.json().catch(() => ({}));
 
   if (!response.ok || !data.success) {
     const message = data.errors?.map((e) => e.message).join(', ') || `HTTP ${response.status}`;
@@ -34,8 +30,8 @@ async function cfFetch(method: string, path: string, body?: unknown) {
   return data.result;
 }
 
-async function getZoneIdByDomain(domain: string): Promise<string> {
-  const result = (await cfFetch('GET', `/zones?name=${encodeURIComponent(domain)}`)) as Array<{ id: string; name: string }>;
+async function getZoneIdByDomain(domain) {
+  const result = await cfFetch('GET', `/zones?name=${encodeURIComponent(domain)}`);
   const zone = result.find((z) => z.name === domain);
   if (!zone) {
     throw new Error(`Zone not found for domain: ${domain}`);
@@ -43,14 +39,9 @@ async function getZoneIdByDomain(domain: string): Promise<string> {
   return zone.id;
 }
 
-async function getCatchAllRule(zoneId: string): Promise<{ id?: string; actions?: unknown[]; enabled?: boolean; name?: string } | null> {
+async function getCatchAllRule(zoneId) {
   try {
-    return (await cfFetch('GET', `/zones/${zoneId}/email/routing/rules/catch_all`)) as {
-      id?: string;
-      actions?: unknown[];
-      enabled?: boolean;
-      name?: string;
-    };
+    return await cfFetch('GET', `/zones/${zoneId}/email/routing/rules/catch_all`);
   } catch (error) {
     const message = error instanceof Error ? error.message : '';
     if (message.includes('not found') || message.includes('not_found')) {
@@ -60,7 +51,7 @@ async function getCatchAllRule(zoneId: string): Promise<{ id?: string; actions?:
   }
 }
 
-async function createCatchAllRule(zoneId: string, workerName: string): Promise<unknown> {
+async function createCatchAllRule(zoneId, workerName) {
   return cfFetch('POST', `/zones/${zoneId}/email/routing/rules`, {
     name: 'Catch-all to Worker',
     enabled: true,
@@ -69,7 +60,7 @@ async function createCatchAllRule(zoneId: string, workerName: string): Promise<u
   });
 }
 
-async function updateCatchAllRule(zoneId: string, rule: { id?: string }, workerName: string): Promise<unknown> {
+async function updateCatchAllRule(zoneId, rule, workerName) {
   if (!rule.id) {
     throw new Error('Cannot update catch-all rule without an ID');
   }
@@ -85,18 +76,38 @@ async function main() {
   const domain = process.env.CLOUDFLARE_DOMAIN;
   const zoneId = process.env.CLOUDFLARE_ZONE_ID || (domain ? await getZoneIdByDomain(domain) : undefined);
   const workerName = process.env.WORKER_NAME || 'dispomail-forwarder';
+  const dryRun = process.env.DRY_RUN === 'true';
 
   if (!zoneId) {
     throw new Error('Set CLOUDFLARE_DOMAIN or CLOUDFLARE_ZONE_ID');
   }
 
-  console.log(`Setting up catch-all routing for zone ${zoneId} → worker ${workerName}`);
+  console.log(`${dryRun ? '[DRY RUN] ' : ''}Setting up catch-all routing for zone ${zoneId} → worker ${workerName}`);
 
   const rule = await getCatchAllRule(zoneId);
+  const targetRule = {
+    name: 'Catch-all to Worker',
+    enabled: true,
+    matchers: [{ type: 'all' }],
+    actions: [{ type: 'worker', value: [workerName] }]
+  };
+
   if (rule) {
-    console.log('Existing catch-all rule found, updating...');
+    console.log('Existing catch-all rule found:');
+    console.log(JSON.stringify(rule, null, 2));
+    if (dryRun) {
+      console.log('[DRY RUN] Would update to:');
+      console.log(JSON.stringify(targetRule, null, 2));
+      return;
+    }
+    console.log('Updating...');
     await updateCatchAllRule(zoneId, rule, workerName);
   } else {
+    if (dryRun) {
+      console.log('[DRY RUN] No existing catch-all rule. Would create:');
+      console.log(JSON.stringify(targetRule, null, 2));
+      return;
+    }
     console.log('No existing catch-all rule, creating...');
     await createCatchAllRule(zoneId, workerName);
   }

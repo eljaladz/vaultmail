@@ -116,6 +116,8 @@ After deploying, verify the Worker appears in **Cloudflare Dashboard** → **Com
 
 Set these from inside the `worker/` directory. These are **worker-only** and are NOT added to Netlify.
 
+**Important:** `WEBHOOK_SECRET` is a secret and must be set with `npx wrangler secret put`. Never pass it via `--var` or commit it — it would be visible in the Cloudflare dashboard as plain text.
+
 ```bash
 cd worker
 
@@ -135,6 +137,8 @@ npx wrangler secret put FORWARD_DOMAINS
 npx wrangler secret put FORWARD_EMAIL
 # Enter: your@email.com (or leave empty)
 ```
+
+The GitHub Actions workflow (`worker-deploy.yml`) deploys the Worker and then sets `WEBHOOK_SECRET` automatically from the `WEBHOOK_SECRET` repository secret.
 
 ### Step 3: Configure Cloudflare Email Routing
 
@@ -172,7 +176,12 @@ If the dashboard dropdown still does not list the Worker, you can create the cat
 ```bash
 export CLOUDFLARE_API_TOKEN=your_token
 export CLOUDFLARE_ZONE_ID=your_zone_id
-npx tsx scripts/setup-email-routing.ts
+
+# Preview changes without applying
+DRY_RUN=true node scripts/setup-email-routing.mjs
+
+# Apply changes
+node scripts/setup-email-routing.mjs
 ```
 
 This creates (or updates) the catch-all rule to route all emails to the `dispomail-forwarder` Worker.

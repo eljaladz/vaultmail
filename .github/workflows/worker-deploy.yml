@@ -39,7 +39,12 @@ jobs:
           WRANGLER_DISABLE_UPDATE_CHECK: "true"
         run: >-
           npx wrangler@4 deploy
-          --var WEBHOOK_URL:${{ secrets.WEBHOOK_URL }}
-          --var WEBHOOK_SECRET:${{ secrets.WEBHOOK_SECRET }}
-          --var FORWARD_DOMAINS:${{ secrets.FORWARD_DOMAINS }}
-          --var FORWARD_EMAIL:${{ secrets.FORWARD_EMAIL }}
+          --var "WEBHOOK_URL:${{ secrets.WEBHOOK_URL }}"
+          --var "FORWARD_DOMAINS:${{ secrets.FORWARD_DOMAINS }}"
+          --var "FORWARD_EMAIL:${{ secrets.FORWARD_EMAIL }}"
+
+      - name: Set WEBHOOK_SECRET
+        working-directory: worker
+        env:
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+        run: printf "%s" "$WEBHOOK_SECRET" | npx wrangler@4 secret put WEBHOOK_SECRET

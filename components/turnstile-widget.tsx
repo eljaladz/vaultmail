@@ -41,6 +41,13 @@ export function TurnstileWidget({ siteKey }: TurnstileWidgetProps) {
           intervalId = null;
         }
       }, 100);
+
+      setTimeout(() => {
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+      }, 10000);
     }
 
     return () => {
