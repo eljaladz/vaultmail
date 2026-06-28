@@ -8,7 +8,8 @@ export type AdminGuardResult = { ok: true } | { ok: false; status: 401 | 403; re
 export async function requireAdminRequest(req: Request): Promise<AdminGuardResult> {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
-  if (!isAdminSessionValid(sessionToken)) {
+  const sessionValid = await isAdminSessionValid(sessionToken);
+  if (!sessionValid) {
     return { ok: false, status: 401 };
   }
 

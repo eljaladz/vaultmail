@@ -18,6 +18,7 @@ const handler = {
 
         const targetUrl = env.WEBHOOK_URL;
         const webhookSecret = env.WEBHOOK_SECRET;
+        const attachmentMaxBytes = parseInt(env.ATTACHMENT_MAX_BYTES || '2000000', 10);
         const forwardDomains = (env.FORWARD_DOMAINS || '')
           .split(',')
           .map((domain) => domain.trim().toLowerCase())
@@ -69,13 +70,17 @@ const handler = {
         }
 
         const attachments = Array.isArray(email.attachments)
-          ? email.attachments.map((attachment) => ({
-              filename: attachment.filename,
-              contentType: attachment.contentType,
-              size: attachment.size,
-              contentBase64: toBase64(attachment.content),
-              contentId: attachment.contentId
-            }))
+          ? email.attachments.map((attachment) => {
+              const oversized = typeof attachment.size === 'number' && attachment.size > attachmentMaxBytes;
+              return {
+                filename: attachment.filename,
+                contentType: attachment.contentType,
+                size: attachment.size,
+                contentBase64: oversized ? undefined : toBase64(attachment.content),
+                omitted: oversized || undefined,
+                contentId: attachment.contentId
+              };
+            })
           : [];
 
         const headers = { 'Content-Type': 'application/json' };

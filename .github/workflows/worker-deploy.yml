@@ -33,12 +33,29 @@ jobs:
         working-directory: worker
         run: npm ci
 
+      - name: Validate required secrets
+        run: |
+          for secret in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID WEBHOOK_URL WEBHOOK_SECRET FORWARD_DOMAINS; do
+            value="${!secret}"
+            if [ -z "$value" ]; then
+              echo "Error: $secret is empty or not set" >&2
+              exit 1
+            fi
+          done
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+          FORWARD_DOMAINS: ${{ secrets.FORWARD_DOMAINS }}
+
       - name: Deploy worker
         working-directory: worker
         env:
           WRANGLER_DISABLE_UPDATE_CHECK: "true"
         run: >-
           npx wrangler@4 deploy
+          --account-id ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           --var "WEBHOOK_URL:${{ secrets.WEBHOOK_URL }}"
           --var "FORWARD_DOMAINS:${{ secrets.FORWARD_DOMAINS }}"
           --var "FORWARD_EMAIL:${{ secrets.FORWARD_EMAIL }}"
@@ -47,4 +64,4 @@ jobs:
         working-directory: worker
         env:
           WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
-        run: printf "%s" "$WEBHOOK_SECRET" | npx wrangler@4 secret put WEBHOOK_SECRET
+        run: printf "%s" "$WEBHOOK_SECRET" | npx wrangler@4 secret put WEBHOOK_SECRET --account-id ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

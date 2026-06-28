@@ -29,7 +29,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized or rate limited' }, { status: 401 });
   }
 
-  const parsed = adminLoginSchema.safeParse(await request.json());
+  let payload: unknown;
+  try {
+    payload = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
+  }
+
+  const parsed = adminLoginSchema.safeParse(payload);
   if (!parsed.success) {
     return NextResponse.json(
       { error: 'Invalid payload', details: parsed.error.format() },
