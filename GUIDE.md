@@ -68,9 +68,10 @@ Go to Site settings → Environment variables. Add each with scope **Functions**
 | `NEXT_PUBLIC_DEFAULT_LOCALE` | Builds | `en` or `id` | Optional |
 | `NEXT_PUBLIC_ADSENSE_CLIENT_ID` | Builds | `<AdSense client ID>` | Optional |
 | `ATTACHMENT_MAX_BYTES` | Functions | `2000000` | Optional |
-| `TURNSTILE_SITE_KEY` | Functions | `<from Cloudflare>` | Optional |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Builds | `<same as above>` | Optional |
-| `TURNSTILE_SECRET_KEY` | Functions | `<from Cloudflare>` | Optional |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Builds | `<Cloudflare site key>` | Optional* |
+| `TURNSTILE_SECRET_KEY` | Functions | `<Cloudflare secret key>` | Optional |
+
+**Turnstile setup:** The widget on `/admin` is rendered by the browser, so it needs the **public** site key (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`). The server verifies tokens with `TURNSTILE_SECRET_KEY`. If you set the secret but forget the public key, login will fail because the widget never appears. Set both and redeploy.
 
 **Do NOT add the following Worker-only variables to Netlify** — they belong in the Cloudflare Worker (see Phase 3): `WEBHOOK_URL`, `FORWARD_DOMAINS`, `FORWARD_EMAIL`.
 

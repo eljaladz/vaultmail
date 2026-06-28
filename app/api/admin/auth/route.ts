@@ -39,7 +39,13 @@ export async function POST(request: Request) {
   const { password, turnstileToken } = parsed.data;
 
   if (process.env.TURNSTILE_SECRET_KEY) {
-    const turnstileOk = await verifyTurnstileToken(turnstileToken || '');
+    if (!turnstileToken || !turnstileToken.trim()) {
+      return NextResponse.json(
+        { error: 'Turnstile token required. Ensure NEXT_PUBLIC_TURNSTILE_SITE_KEY is set and the widget is rendered.' },
+        { status: 400 }
+      );
+    }
+    const turnstileOk = await verifyTurnstileToken(turnstileToken.trim());
     if (!turnstileOk) {
       return NextResponse.json(
         { error: 'Turnstile verification failed.' },
