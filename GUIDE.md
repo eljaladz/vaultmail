@@ -102,6 +102,44 @@ The worker receives inbound emails from Cloudflare Email Routing and forwards th
 
 ### Step 1: Deploy Worker
 
+You can deploy manually with Wrangler or automatically with GitHub Actions.
+
+#### Option A: GitHub Actions (Recommended)
+
+The repo includes `.github/workflows/worker-deploy.yml`. It deploys the Worker on every push to `main` that changes the `worker/` directory.
+
+Required repository secrets (**Settings → Secrets and variables → Actions**):
+
+| Secret | Value | How to get it |
+|---|---|---|
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API token | Create below |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID | Right sidebar in Cloudflare dashboard |
+| `WEBHOOK_URL` | `https://<your-app>.netlify.app/api/webhook` | Your Netlify app URL |
+| `WEBHOOK_SECRET` | Same random string as Netlify `WEBHOOK_SECRET` | `openssl rand -hex 16` |
+| `FORWARD_DOMAINS` | `yourdomain.com,other.com` | Comma-separated domains |
+| `FORWARD_EMAIL` | Optional forward mailbox | Leave empty if not forwarding |
+
+**Cloudflare API token:**
+
+1. Cloudflare Dashboard → **My Profile** → **API Tokens** → **Create Token**
+2. Select the **Edit Cloudflare Workers** template
+3. Permissions should include:
+   - **Account** → **Workers Scripts Write**
+   - **Zone** → **Workers Routes Write**
+   - (Optional) **Zone** → **Email Routing Edit** and **Zone Read** if you use `scripts/setup-email-routing.mjs`
+4. **Account resources** → **Include** → your account
+5. **Zone resources** → **Include** → **All zones from an account** → your account
+6. Continue → Create token → copy it into the `CLOUDFLARE_API_TOKEN` GitHub secret
+
+**Cloudflare Account ID:**
+
+- In the Cloudflare dashboard, open any domain overview. The **Account ID** is shown in the right sidebar.
+- It looks like: `1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p`
+
+After setting the secrets, push to `main` and the workflow will deploy.
+
+#### Option B: Manual Deploy
+
 Deploy the inbound email Worker. Make sure it is the **only** `email()` handler and has no `fetch()` handler, otherwise it will not appear in the Email Routing "Send to a Worker" dropdown.
 
 ```bash
