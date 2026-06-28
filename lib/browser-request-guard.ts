@@ -2,12 +2,20 @@ export type BrowserGuardResult = { ok: true } | { ok: false; reason: string };
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
-function sameOrigin(url: string, value: string | null): boolean {
-  if (!value) return false;
+function getExpectedOrigin(req: Request): string | null {
+  const forwardedHost = req.headers.get('x-forwarded-host');
+  const host = forwardedHost || req.headers.get('host');
+  if (!host) return null;
+
+  const forwardedProto = req.headers.get('x-forwarded-proto');
+  const protocol = forwardedProto === 'http' ? 'http' : 'https';
+  return `${protocol}://${host.toLowerCase()}`;
+}
+
+function sameOrigin(expected: string | null, value: string | null): boolean {
+  if (!expected || !value) return false;
   try {
-    const expected = new URL(url).origin;
-    const actual = new URL(value).origin;
-    return actual === expected;
+    return new URL(value).origin === new URL(expected).origin;
   } catch {
     return false;
   }
@@ -26,6 +34,7 @@ export function requireBrowserUiRequest(req: Request): BrowserGuardResult {
   const origin = req.headers.get('origin');
   const referer = req.headers.get('referer');
   const uiHeader = req.headers.get('x-vaultmail-ui');
+  const expectedOrigin = getExpectedOrigin(req);
 
   if (secFetchSite && !['same-origin', 'same-site', 'none'].includes(secFetchSite)) {
     return forbidden('Cross-site browser request');
@@ -43,17 +52,17 @@ export function requireBrowserUiRequest(req: Request): BrowserGuardResult {
   }
 
   if (!SAFE_METHODS.has(method)) {
-    if (!sameOrigin(req.url, origin)) {
+    if (!sameOrigin(expectedOrigin, origin)) {
       return forbidden('Missing or invalid Origin');
     }
     if (uiHeader !== '1') {
       return forbidden('Missing UI request header');
     }
   } else {
-    if (origin && !sameOrigin(req.url, origin)) {
+    if (origin && !sameOrigin(expectedOrigin, origin)) {
       return forbidden('Invalid Origin');
     }
-    if (referer && !sameOrigin(req.url, referer)) {
+    if (referer && !sameOrigin(expectedOrigin, referer)) {
       return forbidden('Invalid Referer');
     }
   }
