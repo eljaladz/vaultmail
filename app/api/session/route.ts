@@ -12,6 +12,7 @@ import {
 } from '@/lib/auth-rate-limit';
 import { checkApiRateLimit } from '@/lib/api-key-middleware';
 import { createCsrfToken, requireCsrf, CSRF_COOKIE } from '@/lib/csrf';
+import { verifyTurnstileToken } from '@/lib/turnstile';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,7 @@ const COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 
 type SessionBody = {
   apiKey?: string;
+  turnstileToken?: string;
 };
 
 export async function GET(req: Request) {
@@ -86,6 +88,13 @@ export async function POST(request: Request) {
   const apiKey = body.apiKey?.trim();
   if (!apiKey) {
     return NextResponse.json({ error: 'API key required' }, { status: 400 });
+  }
+
+  const turnstileOk = await verifyTurnstileToken(body.turnstileToken ?? '', {
+    expectedAction: 'api-access',
+  });
+  if (!turnstileOk) {
+    return NextResponse.json({ error: 'Bot verification failed' }, { status: 403 });
   }
 
   const valid = await validateApiKey(apiKey);

@@ -61,8 +61,9 @@ export function AdminLogin() {
       <div className="mx-auto flex min-h-screen w-full max-w-xl items-center px-4 py-8 md:py-16 relative z-10">
         <div className="glass-card w-full rounded-2xl border border-white/10 bg-white/5 p-6 md:p-8 shadow-2xl backdrop-blur">
           <div className="flex flex-col gap-2 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full" style={{ backgroundColor: 'var(--accent, #3b82f6)', opacity: 0.1, color: 'var(--accent, #93c5fd)' }}>
-              <ShieldCheck className="h-6 w-6" />
+            <div className="relative mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+              <div className="absolute inset-0 rounded-full opacity-10" style={{ backgroundColor: 'var(--accent, #3b82f6)' }} />
+              <ShieldCheck className="relative h-6 w-6" style={{ color: 'var(--accent, #93c5fd)' }} />
             </div>
             <h1 className="text-xl md:text-2xl font-semibold">Admin Login</h1>
             <p className="text-sm text-white/70">
@@ -80,7 +81,7 @@ export function AdminLogin() {
             />
             {TURNSTILE_SITE_KEY && (
               <div className="flex justify-center">
-                <TurnstileWidget key={turnstileReset} siteKey={TURNSTILE_SITE_KEY} />
+                <TurnstileWidget key={turnstileReset} siteKey={TURNSTILE_SITE_KEY} action="admin-login" />
               </div>
             )}
             <Button type="submit" disabled={loading} className="w-full">

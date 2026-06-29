@@ -556,7 +556,16 @@ export function InboxInterface({ initialAddress, locale, retentionLabel }: Inbox
                <Plus className="h-4 w-4" />
                <span className="hidden sm:inline">Request domain</span>
              </button>
-             {showRequestModal && <RequestDomainModal onClose={() => setShowRequestModal(false)} />}
+             {showRequestModal && (
+    <RequestDomainModal
+      onClose={() => setShowRequestModal(false)}
+      nameservers={
+        process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_NAMESERVERS
+          ? process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_NAMESERVERS.split(',').map((ns) => ns.trim()).filter(Boolean)
+          : undefined
+      }
+    />
+  )}
             <HistoryDropdown
                 history={history}
                 activeAddress={address}

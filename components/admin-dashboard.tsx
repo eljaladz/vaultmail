@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Shield } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -31,6 +31,7 @@ import { TelegramSection } from './admin/telegram-section';
 import { RetentionSection } from './admin/retention-section';
 import { ApiKeysSection } from './admin/api-keys-section';
 import { DonationSection } from './admin/donation-section';
+import { DomainRequestsSection } from './admin/domain-requests-section';
 
 const normalizeDomains = (domains: string[]) =>
   [...new Set(domains.map((domain) => domain.toLowerCase().trim()).filter(Boolean))];
@@ -53,6 +54,7 @@ export function AdminDashboard() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsError, setStatsError] = useState(false);
+  const statsIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [imapSettings, setImapSettings] = useState<ImapSettings>({
     enabled: false,
     host: '',
@@ -167,8 +169,15 @@ export function AdminDashboard() {
     setStatsError(false);
     try {
       const response = await apiFetch('/api/admin/stats');
+      if (response.status === 401) {
+        if (statsIntervalRef.current) {
+          clearInterval(statsIntervalRef.current);
+          statsIntervalRef.current = null;
+        }
+        return;
+      }
       if (!response.ok) {
-        throw new Error('Unauthorized or failed to load stats.');
+        throw new Error('Failed to load stats.');
       }
       const data = (await response.json()) as AdminStats;
       setStats(data);
@@ -357,10 +366,36 @@ export function AdminDashboard() {
   }, []);
 
   useEffect(() => {
-    const initStats = () => fetchStats();
-    initStats();
-    const interval = setInterval(fetchStats, 10000);
-    return () => clearInterval(interval);
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await apiFetch('/api/admin/stats');
+        if (response.status === 401) {
+          if (statsIntervalRef.current) {
+            clearInterval(statsIntervalRef.current);
+            statsIntervalRef.current = null;
+          }
+          return;
+        }
+        if (response.ok && !cancelled) {
+          const data = (await response.json()) as AdminStats;
+          setStats(data);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error(error);
+          setStatsError(true);
+        }
+      }
+    })();
+    statsIntervalRef.current = setInterval(fetchStats, 10000);
+    return () => {
+      cancelled = true;
+      if (statsIntervalRef.current) {
+        clearInterval(statsIntervalRef.current);
+        statsIntervalRef.current = null;
+      }
+    };
   }, [fetchStats]);
 
   const latestActivityLabel = useMemo(() => {
@@ -439,6 +474,8 @@ export function AdminDashboard() {
             <AccentColorSection />
 
             <hr className="border-white/10 my-2" />
+
+            <DomainRequestsSection onDomainAdded={loadSettings} />
 
             <CloudflareDomainsSection onDomainAdded={loadSettings} />
 

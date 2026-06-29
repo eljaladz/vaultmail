@@ -36,6 +36,7 @@ type RateLimitCategory =
   | 'favicon.read'
   | 'breach.check'
   | 'domain.expiration'
+  | 'domain.request'
   | 'homepage.auth'
   | 'session.create'
   | 'session.read'
@@ -53,6 +54,7 @@ const RATE_POLICIES: Record<RateLimitCategory, Record<Mode, { max: number; windo
   'favicon.read':        { anonymous: { max: 120, window: 60 }, session: { max: 120, window: 60 }, 'api-key': { max: 240, window: 60 } },
   'breach.check':        { anonymous: { max: 5,  window: 60 },  session: { max: 10, window: 60 },  'api-key': { max: 30, window: 60 } },
   'domain.expiration':   { anonymous: { max: 10, window: 60 },  session: { max: 15, window: 60 },  'api-key': { max: 30, window: 60 } },
+  'domain.request':      { anonymous: { max: 3,  window: 300 }, session: { max: 5,  window: 300 }, 'api-key': { max: 10, window: 300 } },
   'homepage.auth':       { anonymous: { max: 5,  window: 60 },  session: { max: 5,  window: 60 },  'api-key': { max: 5,  window: 60 } },
   'admin.login':         { anonymous: { max: 5,  window: 60 },  session: { max: 5,  window: 60 },  'api-key': { max: 5,  window: 60 } },
   'session.create':      { anonymous: { max: 10, window: 60 },  session: { max: 10, window: 60 },  'api-key': { max: 30, window: 60 } },

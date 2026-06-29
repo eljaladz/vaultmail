@@ -7,10 +7,13 @@ import { Code2, KeyRound, Loader2, Shield } from 'lucide-react'
 
 import { NavMenu } from './nav-menu'
 import { Input } from '@/components/ui/input'
+import { TurnstileWidget } from '@/components/turnstile-widget'
 import { getTranslations } from '@/lib/i18n'
 import { DEFAULT_APP_NAME } from '@/lib/branding'
 import { apiFetch } from '@/lib/client/api-fetch'
 import { toast } from 'sonner'
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
 const STORAGE_KEY = 'vaultmail_locale'
 
@@ -21,6 +24,7 @@ export function ApiAccessPage() {
   const [authed, setAuthed] = useState(false)
   const [apiKey, setApiKey] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState('')
 
   useEffect(() => {
     function handleStorageChange() {
@@ -82,12 +86,16 @@ export function ApiAccessPage() {
       toast.error('API key is required.')
       return
     }
+    if (TURNSTILE_SITE_KEY && !turnstileToken) {
+      toast.error('Please complete the bot verification.')
+      return
+    }
     setSubmitting(true)
     try {
       const response = await apiFetch('/api/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey: apiKey.trim() }),
+        body: JSON.stringify({ apiKey: apiKey.trim(), turnstileToken }),
       })
       if (!response.ok) {
         const data = (await response.json().catch(() => null)) as {
@@ -150,6 +158,16 @@ export function ApiAccessPage() {
                 />
               </div>
             </div>
+            {TURNSTILE_SITE_KEY && (
+              <div className="flex justify-center">
+                <TurnstileWidget
+                  siteKey={TURNSTILE_SITE_KEY}
+                  action="api-access"
+                  onVerify={(token) => setTurnstileToken(token)}
+                  onExpire={() => setTurnstileToken('')}
+                />
+              </div>
+            )}
             <Button
               type="submit"
               size="lg"

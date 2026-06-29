@@ -185,6 +185,32 @@ export const storage = {
     });
   },
 
+  async replaceIfValueNotMatching(
+    key: string,
+    field: string,
+    excludedValue: unknown,
+    newValue: StoredValue,
+    options?: { ex?: number }
+  ): Promise<boolean> {
+    invalidateSettingsCache(key);
+    return withDb<boolean>(false, async (db) => {
+      const kv = db.collection<KeyValueDocument>('kv_store');
+      const expiresAt = options?.ex
+        ? new Date(Date.now() + options.ex * 1000)
+        : null;
+      const filter: Record<string, unknown> = {
+        _id: key,
+        [`value.${field}`]: { $ne: excludedValue },
+      };
+      const result = await kv.findOneAndUpdate(
+        filter,
+        { $set: { value: newValue, expiresAt } },
+        { returnDocument: 'after' }
+      );
+      return result !== null;
+    });
+  },
+
   async kvKeys(pattern: string): Promise<string[]> {
     return withDb<string[]>([], async (db) => {
       const kv = db.collection<KeyValueDocument>('kv_store');

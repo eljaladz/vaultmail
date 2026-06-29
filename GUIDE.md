@@ -83,6 +83,8 @@ Go to Site settings → Environment variables. Add each with scope **Functions**
 
 Account resources → Include → your account. Zone resources → Include → All zones from an account → your account. Leave both empty if you don't want the admin UI to manage domains via Cloudflare.
 
+**Domain request modal (optional):** Set `NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_NAMESERVERS` to show your account's global nameservers (e.g. `bob.ns.cloudflare.com,lola.ns.cloudflare.com`) in the public "Request new domain" modal on the homepage. Users can submit domain add/remove requests with Turnstile protection. Requests appear in the admin notification panel and trigger a Telegram notification if configured. If approved, the domain automatically starts Cloudflare onboarding with `source: 'user-request'`. If not set, the modal shows generic instructions without specific nameservers.
+
 **Do NOT add the following Worker-only variables to Netlify** — they belong in the Cloudflare Worker (see Phase 3): `WEBHOOK_URL`, `FORWARD_DOMAINS`, `FORWARD_EMAIL`.
 
 Generate secrets:

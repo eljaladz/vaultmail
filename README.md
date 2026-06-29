@@ -35,6 +35,8 @@ User browses / -> InboxInterface polls GET /api/inbox -> displays emails
 - Privacy-first: emails stored in MongoDB with auto-expiry (30 min to 1 week)
 - Custom domains: admin-configured, multi-subdomain support (root + subdomain pools)
 - Cloudflare domain onboarding: add domains via Cloudflare API from the admin UI (auto-configures nameservers, Email Routing, catch-all rule)
+- Domain request modal: public "Request domain" button on homepage with Turnstile-protected submission flow, nameserver display, and admin notification panel
+- Telegram notifications: admin gets Telegram message on new domain request (no email notifications for privacy)
 - Real-time inbox: auto-refreshes every 10 seconds
 - 3-mode auth: API key (50 req/min), session (15 req/min), anonymous (rate-limited)
 - Per-endpoint rate limits with global abuse ceiling
@@ -42,13 +44,14 @@ User browses / -> InboxInterface polls GET /api/inbox -> displays emails
 - Timing-safe admin password verification (SHA-256 hash + crypto.timingSafeEqual)
 - HSTS + forced secure cookies in production
 - Settings cache: in-memory TTL cache for `settings:*` reads (reduces MongoDB load)
+- Domain source tracking: `admin` vs `user-request` — only user-requested domains can be removed via user request flow
 - Dynamic branding: admin-configurable app name, favicon, and accent color
 - Donation button: floating coffee icon on all pages with EVM address QR code (admin-configurable)
 - Dark glassmorphism UI with responsive mobile design
-- Tools: 2FA generator, Gmail dot trick, token generator, URL codec, day counter, refund calculator, email breach checker
+- Tools: 2FA generator, Gmail dot trick, token generator, URL codec, email breach checker
 - Developer API access page (gated by API key)
 - IMAP fetch (raw TLS, runtime-hardened with socket timeouts)
-- Vitest test suite (214 tests)
+- Vitest test suite (225 tests)
 - Zod validation at all API boundaries
 - CI/CD via GitHub Actions (lint + test + build)
 

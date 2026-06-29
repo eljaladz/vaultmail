@@ -2,8 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+type TurnstileAction = 'admin-login' | 'domain-request' | 'api-access';
+
 interface TurnstileWidgetProps {
   siteKey: string;
+  action?: TurnstileAction;
+  onVerify?: (token: string) => void;
+  onExpire?: () => void;
+  onError?: () => void;
 }
 
 declare global {
@@ -17,16 +23,26 @@ declare global {
 
 const RENDER_TIMEOUT_MS = 10_000;
 
-export function TurnstileWidget({ siteKey }: TurnstileWidgetProps) {
+export function TurnstileWidget({ siteKey, action, onVerify, onExpire, onError }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const onVerifyRef = useRef(onVerify);
+  const onExpireRef = useRef(onExpire);
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onVerifyRef.current = onVerify;
+    onExpireRef.current = onExpire;
+    onErrorRef.current = onError;
+  }, [onVerify, onExpire, onError]);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    let intervalId: NodeJS.Timeout | null = null;
-    let timeoutId: NodeJS.Timeout | null = null;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let cancelled = false;
 
     const tryRender = () => {
       if (!containerRef.current || !window.turnstile) return false;
@@ -34,28 +50,42 @@ export function TurnstileWidget({ siteKey }: TurnstileWidgetProps) {
       widgetIdRef.current = window.turnstile.render(containerRef.current, {
         sitekey: siteKey,
         theme: 'dark',
+        ...(action ? { action } : {}),
+        callback: (token: string) => onVerifyRef.current?.(token),
+        'expired-callback': () => onExpireRef.current?.(),
+        'error-callback': () => onErrorRef.current?.(),
       });
       return true;
     };
 
     if (!tryRender()) {
       intervalId = setInterval(() => {
+        if (cancelled) return;
         if (tryRender() && intervalId) {
           clearInterval(intervalId);
           intervalId = null;
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+          }
         }
       }, 100);
 
       timeoutId = setTimeout(() => {
+        if (cancelled) return;
         if (intervalId) {
           clearInterval(intervalId);
           intervalId = null;
         }
-        setFailed(true);
+        // Only show error if widget never rendered
+        if (!widgetIdRef.current) {
+          setFailed(true);
+        }
       }, RENDER_TIMEOUT_MS);
     }
 
     return () => {
+      cancelled = true;
       if (intervalId) clearInterval(intervalId);
       if (timeoutId) clearTimeout(timeoutId);
       if (widgetIdRef.current && window.turnstile) {
@@ -63,7 +93,7 @@ export function TurnstileWidget({ siteKey }: TurnstileWidgetProps) {
         widgetIdRef.current = null;
       }
     };
-  }, [siteKey]);
+  }, [siteKey, action]);
 
   if (failed) {
     return (
