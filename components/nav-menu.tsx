@@ -43,7 +43,7 @@ export function NavMenu({ }: NavMenuProps) {
         type="button"
         variant="ghost"
         onClick={() => setShowMenu((prev) => !prev)}
-        className="h-12 w-12 rounded-full border border-white/10 bg-white/10 text-white"
+        className="h-10 w-10 md:h-12 md:w-12 rounded-full border border-white/10 bg-white/10 text-white"
       >
         <Menu className="h-5 w-5" style={{ color: 'var(--accent, #93c5fd)' }} />
       </Button>

@@ -489,10 +489,10 @@ export function InboxInterface({ initialAddress, locale, retentionLabel }: Inbox
   return (
     <div className="w-full max-w-6xl mx-auto p-4 md:p-8 space-y-8">
       {/* Header / Controls */}
-      <div className="glass-card rounded-2xl p-6 md:p-8 space-y-6 relative z-10">
+      <div className="glass-card rounded-2xl p-4 md:p-8 space-y-6 relative z-10">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="space-y-1 text-center md:text-left">
-            <h2 className="text-2xl font-bold bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(to right, var(--accent, #60a5fa), var(--accent, #c084fc))' }}>
+            <h2 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(to right, var(--accent, #60a5fa), var(--accent, #c084fc))' }}>
               {t.inboxTitle}
             </h2>
             <p className="text-muted-foreground text-sm">
@@ -523,14 +523,14 @@ export function InboxInterface({ initialAddress, locale, retentionLabel }: Inbox
                           localStorage.setItem('dispo_address', `${val}@${currentDomain}`);
                       }}
                       onBlur={() => addToHistory(address)}
-                      className="pr-4 font-mono text-lg bg-black/20 border-white/10 h-12"
+                      className="pr-4 font-mono text-base md:text-lg bg-black/20 border-white/10 h-10 md:h-12"
                       placeholder={t.usernamePlaceholder}
                   />
             </div>
             <div className="relative flex items-center shrink-0">
-                 <span className="text-muted-foreground text-lg px-2">@</span>
+                 <span className="text-muted-foreground text-base md:text-lg px-2">@</span>
             </div>
-             <div className="relative max-w-[250px] shrink-0">
+             <div className="relative max-w-[calc(100vw-2rem)] md:max-w-[250px] shrink-0">
                  <DomainSelector
                     domains={systemDomains}
                     selectedDomain={domain}
@@ -550,7 +550,7 @@ export function InboxInterface({ initialAddress, locale, retentionLabel }: Inbox
              <button
                type="button"
                onClick={() => setShowRequestModal(true)}
-               className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 h-12 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+               className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 h-10 md:h-12 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
                title="Request a new domain"
              >
                <Plus className="h-4 w-4" />
@@ -581,10 +581,10 @@ export function InboxInterface({ initialAddress, locale, retentionLabel }: Inbox
                     localStorage.setItem('dispo_history', JSON.stringify(newHist));
                 }}
             />
-            <Button onClick={copyAddress} variant="secondary" size="lg" className="h-12 shrink-0">
+            <Button onClick={copyAddress} variant="secondary" size="lg" className="h-10 md:h-12 shrink-0">
               <Copy className="mr-2 h-4 w-4" /> {t.copy}
             </Button>
-            <Button onClick={generateAddress} variant="outline" size="lg" className="h-12 border-white/10 hover:bg-white/5 shrink-0">
+            <Button onClick={generateAddress} variant="outline" size="lg" className="h-10 md:h-12 border-white/10 hover:bg-white/5 shrink-0">
               <RefreshCw className="mr-2 h-4 w-4" /> {t.newAlias}
             </Button>
           </div>

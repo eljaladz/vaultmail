@@ -60,7 +60,7 @@ export function HistoryDropdown({
         onClick={() => setShow(!show)}
         variant="ghost"
         size="icon"
-        className={cn("h-12 w-12 border border-white/10 hover:bg-white/5 relative", show && "bg-white/10 ring-2 ring-white/10")}
+        className={cn("h-10 w-10 md:h-12 md:w-12 border border-white/10 hover:bg-white/5 relative", show && "bg-white/10 ring-2 ring-white/10")}
         title={t.historyTitle}
       >
         <HistoryIcon className="h-5 w-5" />

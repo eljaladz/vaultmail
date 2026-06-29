@@ -46,16 +46,20 @@ export function DomainSelector({
   }, [showDomainMenu, setShowDomainMenu]);
 
   const longestDomain = domains.reduce((max, d) => d.length > max.length ? d : max, selectedDomain);
-  const minWidth = Math.min(Math.max(longestDomain.length * 7.2 + 40, 160), 280);
+  const calculatedMinWidth = Math.min(Math.max(longestDomain.length * 7.2 + 40, 160), 280);
 
   return (
-    <div className="relative shrink-0" style={{ minWidth }} ref={containerRef}>
+    <div
+      className="relative shrink-0 w-full md:w-auto"
+      style={{ minWidth: `clamp(10rem, ${calculatedMinWidth}px, calc(100vw - 2rem))` }}
+      ref={containerRef}
+    >
       <Button
         type="button"
         variant="ghost"
         onClick={() => setShowDomainMenu((prev) => !prev)}
         className={cn(
-          "w-full h-12 px-3 justify-between rounded-md border border-white/10 bg-white/5 text-sm font-mono hover:bg-white/10",
+          "w-full h-10 md:h-12 px-3 justify-between rounded-md border border-white/10 bg-white/5 text-sm font-mono hover:bg-white/10",
           showDomainMenu && "bg-white/10"
         )}
       >

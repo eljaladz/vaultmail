@@ -26,12 +26,15 @@ export type OnboardingStep =
   | 'failed_retryable'
   | 'failed_terminal';
 
+export type OnboardingSource = 'admin' | 'user-request';
+
 export type OnboardingRecord = {
   domain: string;
   zoneId: string | null;
   nameservers: string[] | null;
   cfStatus: string | null;
   step: OnboardingStep;
+  source: OnboardingSource;
   error?: { code: number; message: string; retryable: boolean };
   createdAt: string;
   updatedAt: string;
@@ -60,17 +63,35 @@ const isValidDomain = (domain: string): boolean => {
   return HOSTNAME_REGEX.test(domain);
 };
 
+const normalizeRecord = (raw: unknown): OnboardingRecord | null => {
+  if (!raw || typeof raw !== 'object') return null;
+  const r = raw as Partial<OnboardingRecord>;
+  return {
+    domain: r.domain ?? '',
+    zoneId: r.zoneId ?? null,
+    nameservers: r.nameservers ?? null,
+    cfStatus: r.cfStatus ?? null,
+    step: r.step ?? 'pending_ns',
+    source: r.source === 'user-request' ? 'user-request' : 'admin',
+    error: r.error,
+    createdAt: r.createdAt ?? nowIso(),
+    updatedAt: r.updatedAt ?? nowIso(),
+    lastCheckedAt: r.lastCheckedAt ?? null,
+    removedFromAppAt: r.removedFromAppAt ?? undefined,
+  };
+};
+
 const readRecord = async (domain: string): Promise<OnboardingRecord | null> => {
   const raw = await storage.get(onboardingKey(domain));
   if (!raw) return null;
   if (typeof raw === 'string') {
     try {
-      return JSON.parse(raw) as OnboardingRecord;
+      return normalizeRecord(JSON.parse(raw));
     } catch {
       return null;
     }
   }
-  return raw as OnboardingRecord;
+  return normalizeRecord(raw);
 };
 
 const writeRecord = async (record: OnboardingRecord): Promise<void> => {
@@ -110,7 +131,7 @@ const stepFromZoneStatus = (status: string): OnboardingStep => {
   return 'pending_ns';
 };
 
-const buildRecordFromZone = (zone: CfZone): OnboardingRecord => {
+const buildRecordFromZone = (zone: CfZone, source: OnboardingSource = 'admin'): OnboardingRecord => {
   const ts = nowIso();
   return {
     domain: zone.name,
@@ -118,6 +139,7 @@ const buildRecordFromZone = (zone: CfZone): OnboardingRecord => {
     nameservers: zone.name_servers,
     cfStatus: zone.status,
     step: stepFromZoneStatus(zone.status),
+    source,
     createdAt: ts,
     updatedAt: ts,
     lastCheckedAt: ts,
@@ -132,8 +154,12 @@ const canRetryStart = (record: OnboardingRecord | null): boolean => {
   return false;
 };
 
-export async function startOnboarding(domainInput: string): Promise<OnboardingRecord> {
+export async function startOnboarding(
+  domainInput: string,
+  options?: { source?: OnboardingSource }
+): Promise<OnboardingRecord> {
   const domain = normalizeDomain(domainInput);
+  const source: OnboardingSource = options?.source ?? 'admin';
   if (!isValidDomain(domain)) {
     throw new Error('Invalid domain. Use a valid hostname like example.com (no scheme, path, or query).');
   }
@@ -164,10 +190,11 @@ export async function startOnboarding(domainInput: string): Promise<OnboardingRe
       zone = await createZone(domain, accountId);
     }
 
-    const record = buildRecordFromZone(zone);
+    const record = buildRecordFromZone(zone, source);
     const prev = await readRecord(domain);
     if (prev) {
       record.createdAt = prev.createdAt;
+      record.source = prev.source ?? source;
     }
     await writeRecord(record);
     return record;
@@ -179,6 +206,7 @@ export async function startOnboarding(domainInput: string): Promise<OnboardingRe
       nameservers: prev?.nameservers ?? null,
       cfStatus: prev?.cfStatus ?? null,
       step: isTerminal(err) ? 'failed_terminal' : 'failed_retryable',
+      source: prev?.source ?? source,
       error: fromCfError(err),
       createdAt: prev?.createdAt ?? nowIso(),
       updatedAt: nowIso(),
@@ -312,7 +340,8 @@ export async function listOnboarding(): Promise<OnboardingRecord[]> {
     } catch {
       continue;
     }
-    records.push(parsed as OnboardingRecord);
+    const record = normalizeRecord(parsed);
+    if (record) records.push(record);
   }
   return records.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
@@ -354,14 +383,21 @@ const acquireGlobalLock = async (): Promise<boolean> => {
 /**
  * Soft remove: remove domain from app active list but keep CF zone intact.
  */
-export async function removeFromApp(domainInput: string): Promise<OnboardingRecord> {
+export async function removeFromApp(
+  domainInput: string,
+  options?: { actor?: 'admin' | 'user' }
+): Promise<OnboardingRecord> {
   const domain = normalizeDomain(domainInput);
+  const actor = options?.actor ?? 'admin';
   const record = await readRecord(domain);
   if (!record) {
     throw new DomainStateError(`No onboarding record for ${domain}`, 404);
   }
   if (record.step !== 'added_to_app') {
     throw new DomainStateError(`Domain must be in added_to_app state to remove (current: ${record.step})`, 400);
+  }
+  if (actor === 'user' && record.source !== 'user-request') {
+    throw new DomainStateError('This domain was assigned by an admin and cannot be removed via user request.', 403);
   }
 
   const acquired = await acquireLock(domain);

@@ -56,15 +56,15 @@ export function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/50 relative overflow-hidden flex flex-col text-white">
-      <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'var(--accent, #3b82f6)', opacity: 0.1 }} />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'var(--accent, #8b5cf6)', opacity: 0.1 }} />
-      <div className="mx-auto flex min-h-screen w-full max-w-xl items-center px-4 py-16 relative z-10">
+      <div className="absolute top-0 left-1/4 w-64 h-64 md:w-96 md:h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'var(--accent, #3b82f6)', opacity: 0.1 }} />
+      <div className="absolute bottom-0 right-1/4 w-64 h-64 md:w-96 md:h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'var(--accent, #8b5cf6)', opacity: 0.1 }} />
+      <div className="mx-auto flex min-h-screen w-full max-w-xl items-center px-4 py-8 md:py-16 relative z-10">
         <div className="glass-card w-full rounded-2xl border border-white/10 bg-white/5 p-6 md:p-8 shadow-2xl backdrop-blur">
           <div className="flex flex-col gap-2 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full" style={{ backgroundColor: 'var(--accent, #3b82f6)', opacity: 0.1, color: 'var(--accent, #93c5fd)' }}>
               <ShieldCheck className="h-6 w-6" />
             </div>
-            <h1 className="text-2xl font-semibold">Admin Login</h1>
+            <h1 className="text-xl md:text-2xl font-semibold">Admin Login</h1>
             <p className="text-sm text-white/70">
               Enter admin password to access the dashboard.
             </p>

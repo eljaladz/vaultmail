@@ -59,15 +59,15 @@ export function HomepageLock({ appName = DEFAULT_APP_NAME }: HomepageLockProps) 
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-background/50 relative overflow-hidden flex flex-col items-center justify-center px-4">
-      <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'var(--accent, #3b82f6)', opacity: 0.1 }} />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'var(--accent, #8b5cf6)', opacity: 0.1 }} />
+      <div className="absolute top-0 left-1/4 w-64 h-64 md:w-96 md:h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'var(--accent, #3b82f6)', opacity: 0.1 }} />
+      <div className="absolute bottom-0 right-1/4 w-64 h-64 md:w-96 md:h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'var(--accent, #8b5cf6)', opacity: 0.1 }} />
 
-      <div className="glass-card w-full max-w-md rounded-3xl border border-white/10 bg-black/40 backdrop-blur-lg p-8 shadow-2xl">
+      <div className="glass-card w-full max-w-md rounded-3xl border border-white/10 bg-black/40 backdrop-blur-lg p-6 md:p-8 shadow-2xl">
         <div className="flex flex-col items-center text-center space-y-3">
-          <div className="h-14 w-14 rounded-2xl flex items-center justify-center" style={{ backgroundImage: 'linear-gradient(to bottom right, var(--accent, #3b82f6), var(--accent, #8b5cf6))' }}>
-            <Shield className="h-7 w-7 text-white" />
+          <div className="h-12 w-12 md:h-14 md:w-14 rounded-2xl flex items-center justify-center" style={{ backgroundImage: 'linear-gradient(to bottom right, var(--accent, #3b82f6), var(--accent, #8b5cf6))' }}>
+            <Shield className="h-6 w-6 md:h-7 md:w-7 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-xl md:text-2xl font-bold text-white">
             {appName} Private
           </h1>
           <p className="text-sm text-white/60">

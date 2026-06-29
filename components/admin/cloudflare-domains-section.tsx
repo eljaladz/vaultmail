@@ -318,6 +318,11 @@ export function CloudflareDomainsSection({ onDomainAdded }: CloudflareDomainsSec
                       >
                         {STEP_LABELS[record.step]}
                       </span>
+                      {record.source === 'user-request' && (
+                        <span className="rounded border border-purple-500/30 bg-purple-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-purple-300">
+                          User
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-1">
                       {(record.step === 'pending_ns' || record.step === 'failed_retryable' || record.step === 'active' || record.step === 'email_routing_enabled' || record.step === 'catch_all_configured') && (

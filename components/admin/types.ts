@@ -57,12 +57,15 @@ export type OnboardingStep =
   | 'failed_retryable'
   | 'failed_terminal';
 
+export type OnboardingSource = 'admin' | 'user-request';
+
 export type OnboardingRecord = {
   domain: string;
   zoneId: string | null;
   nameservers: string[] | null;
   cfStatus: string | null;
   step: OnboardingStep;
+  source: OnboardingSource;
   error?: { code: number; message: string; retryable: boolean };
   createdAt: string;
   updatedAt: string;

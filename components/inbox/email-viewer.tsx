@@ -31,13 +31,13 @@ export function EmailViewer({
   const selectedSender = email ? getSenderInfo(email.from) : null;
 
   return (
-    <div className="md:col-span-2 glass-card rounded-2xl overflow-hidden flex flex-col h-full min-h-[55vh] md:min-h-0 bg-black/40">
+    <div className="md:col-span-2 glass-card rounded-2xl overflow-hidden flex flex-col h-full min-h-[40vh] md:min-h-0 bg-black/40">
       {email ? (
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-6 border-b border-white/5 space-y-4 bg-black/20">
+          <div className="p-4 md:p-6 border-b border-white/5 space-y-4 bg-black/20">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <h1 className="text-xl font-bold text-white">{email.subject}</h1>
+              <h1 className="text-base md:text-xl font-bold text-white break-words">{email.subject}</h1>
               <div className="flex items-center gap-2">
                 <Button variant="ghost" size="sm" onClick={downloadEmail}>
                   <Download className="mr-2 h-4 w-4" />
@@ -93,7 +93,7 @@ export function EmailViewer({
                 )
               )}
               sandbox=""
-              className="w-full h-full min-h-[400px] border-0"
+              className="w-full h-full min-h-[300px] md:min-h-[400px] border-0"
               title="Email content"
             />
           </div>

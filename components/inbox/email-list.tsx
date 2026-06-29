@@ -53,7 +53,7 @@ export function EmailList({
   const unreadCount = emails.filter((email) => !readEmailIds.has(email.id)).length;
 
   return (
-    <div className="md:col-span-1 glass-card rounded-2xl overflow-hidden flex flex-col min-h-[45vh] md:min-h-0">
+    <div className="md:col-span-1 glass-card rounded-2xl overflow-hidden flex flex-col min-h-[35vh] md:min-h-0">
       <div className="p-4 border-b border-white/5 flex justify-between items-center bg-black/20">
         <h3 className="font-semibold flex items-center gap-2">
           <Mail className="h-4 w-4" style={{ color: 'var(--accent, #60a5fa)' }} /> {t.inboxLabel}

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Calendar, KeyRound, MailPlus, Shield, Wrench, Binary, Coins, Key, ShieldAlert } from 'lucide-react';
+import { KeyRound, MailPlus, Shield, Wrench, Binary, Key, ShieldAlert } from 'lucide-react';
 
 import { NavMenu } from './nav-menu';
 import { getTranslations } from '@/lib/i18n';
@@ -53,8 +53,8 @@ export function ToolsPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-background/50 relative overflow-hidden flex flex-col">
-      <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'var(--accent, #3b82f6)', opacity: 0.1 }} />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'var(--accent, #8b5cf6)', opacity: 0.1 }} />
+      <div className="absolute top-0 left-1/4 w-64 h-64 md:w-96 md:h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'var(--accent, #3b82f6)', opacity: 0.1 }} />
+      <div className="absolute bottom-0 right-1/4 w-64 h-64 md:w-96 md:h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'var(--accent, #8b5cf6)', opacity: 0.1 }} />
 
       <header className="border-b border-white/5 bg-background/50 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -122,21 +122,6 @@ export function ToolsPage() {
             </div>
             <div className="rounded-xl border border-white/10 bg-black/40 p-4 space-y-3">
               <div className="flex items-center gap-2 text-white">
-                <Coins className="h-4 w-4 text-emerald-200" />
-                <p className="text-sm font-semibold">{t.toolsRefundTitle}</p>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {t.toolsRefundDesc}
-              </p>
-              <Link
-                href="/refund-calculator"
-                className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/20"
-              >
-                {t.toolsRefundCta}
-              </Link>
-            </div>
-            <div className="rounded-xl border border-white/10 bg-black/40 p-4 space-y-3">
-              <div className="flex items-center gap-2 text-white">
                 <Key className="h-4 w-4" style={{ color: 'var(--accent, #c4b5fd)' }} />
                 <p className="text-sm font-semibold">{t.toolsTokenTitle}</p>
               </div>
@@ -148,21 +133,6 @@ export function ToolsPage() {
                 className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/20"
               >
                 {t.toolsTokenCta}
-              </Link>
-            </div>
-            <div className="rounded-xl border border-white/10 bg-black/40 p-4 space-y-3">
-              <div className="flex items-center gap-2 text-white">
-                <Calendar className="h-4 w-4" style={{ color: 'var(--accent, #93c5fd)' }} />
-                <p className="text-sm font-semibold">{t.toolsDayCounterTitle}</p>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {t.toolsDayCounterDesc}
-              </p>
-              <Link
-                href="/day-counter"
-                className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/20"
-              >
-                {t.toolsDayCounterCta}
               </Link>
             </div>
             <div className="rounded-xl border border-white/10 bg-black/40 p-4 space-y-3">
@@ -194,14 +164,6 @@ export function ToolsPage() {
               >
                 {t.toolsBreachCta}
               </Link>
-            </div>
-            <div className="rounded-xl border border-white/10 bg-black/40 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
-                {t.menuTools}
-              </p>
-              <p className="mt-3 text-sm text-white/80">
-                {t.toolsSubtitle}
-              </p>
             </div>
           </div>
         </div>
