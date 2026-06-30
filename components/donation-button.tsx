@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import Image from 'next/image';
 import { Coffee, X, Copy, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -99,12 +100,13 @@ export function DonationFloatingButton({ evmAddress, message }: DonationFloating
 
             <div className="flex flex-col items-center gap-4">
               {qrDataUrl ? (
-                <img
+                <Image
                   src={qrDataUrl}
                   alt="Donation QR code"
                   className="h-[240px] w-[240px] rounded-lg border border-white/10"
                   width={240}
                   height={240}
+                  unoptimized
                 />
               ) : (
                 <div className="flex h-[240px] w-[240px] items-center justify-center">
