@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { storage } from '@/lib/storage';
 import { API_KEYS_SETTINGS_KEY } from '@/lib/admin-auth';
+import { withPrefix } from '@/lib/storage-keys';
 
 export const API_KEY_COOKIE = 'vaultmail_api_key';
 
@@ -12,6 +13,25 @@ export type ApiKeyEntry = {
 };
 
 const PREFIX = 'vmail_';
+const API_KEYS_WRITE_LOCK = withPrefix('api-key:write-lock');
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const withWriteLock = async <T>(action: () => Promise<T>): Promise<T> => {
+  const lockKey = API_KEYS_WRITE_LOCK;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const acquired = await storage.setIfAbsent(lockKey, '1', { ex: 5 });
+    if (acquired) {
+      try {
+        return await action();
+      } finally {
+        await storage.del(lockKey);
+      }
+    }
+    await sleep(50);
+  }
+  throw new Error('Could not acquire API key write lock');
+};
 
 export const generateApiKey = () => {
   const random = crypto.randomBytes(24).toString('hex');
@@ -47,19 +67,22 @@ export const addApiKey = async (label: string): Promise<string> => {
     label: label.slice(0, 50),
     createdAt: new Date().toISOString(),
   };
-  const keys = await getApiKeys();
-  keys.push(entry);
-  await storage.set(API_KEYS_SETTINGS_KEY, keys);
+  await withWriteLock(async () => {
+    const keys = await getApiKeys();
+    keys.push(entry);
+    await storage.set(API_KEYS_SETTINGS_KEY, keys);
+  });
   return plainKey;
 };
 
-export const revokeApiKey = async (hash: string): Promise<boolean> => {
-  const keys = await getApiKeys();
-  const filtered = keys.filter((k) => k.hash !== hash);
-  if (filtered.length === keys.length) return false;
-  await storage.set(API_KEYS_SETTINGS_KEY, filtered);
-  return true;
-};
+export const revokeApiKey = async (hash: string): Promise<boolean> =>
+  withWriteLock(async () => {
+    const keys = await getApiKeys();
+    const filtered = keys.filter((k) => k.hash !== hash);
+    if (filtered.length === keys.length) return false;
+    await storage.set(API_KEYS_SETTINGS_KEY, filtered);
+    return true;
+  });
 
 export const validateApiKey = async (plainKey: string): Promise<boolean> => {
   if (!plainKey || !plainKey.startsWith(PREFIX)) return false;

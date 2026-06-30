@@ -8,6 +8,7 @@ import { Code2, KeyRound, Loader2, Shield } from 'lucide-react'
 import { NavMenu } from './nav-menu'
 import { Input } from '@/components/ui/input'
 import { TurnstileWidget } from '@/components/turnstile-widget'
+import { RequestApiKeyModal } from '@/components/inbox/request-api-key-modal'
 import { getTranslations } from '@/lib/i18n'
 import { DEFAULT_APP_NAME } from '@/lib/branding'
 import { apiFetch } from '@/lib/client/api-fetch'
@@ -25,6 +26,7 @@ export function ApiAccessPage() {
   const [apiKey, setApiKey] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false)
 
   useEffect(() => {
     function handleStorageChange() {
@@ -180,6 +182,15 @@ export function ApiAccessPage() {
                 'Unlock'
               )}
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={() => setIsRequestModalOpen(true)}
+              className="w-full mt-2 border-white/10 text-white hover:bg-white/10 hover:text-white"
+            >
+              Request API Key
+            </Button>
           </form>
 
           <div className="mt-6 text-center">
@@ -191,6 +202,9 @@ export function ApiAccessPage() {
             </Link>
           </div>
         </div>
+        {isRequestModalOpen && (
+          <RequestApiKeyModal onClose={() => setIsRequestModalOpen(false)} />
+        )}
       </main>
     )
   }

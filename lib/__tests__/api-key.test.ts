@@ -15,15 +15,25 @@ afterEach(() => {
 
 const createStorageMock = () => {
   const store = new Map<string, unknown>();
+  const ttl = new Map<string, number>();
   const storage = {
     get: vi.fn(async (key: string) => store.get(key) ?? null),
     set: vi.fn(async (key: string, value: unknown) => {
       store.set(key, value);
       return 'OK';
     }),
+    setIfAbsent: vi.fn(async (key: string, value: unknown, options?: { ex?: number }) => {
+      if (store.has(key)) return false;
+      store.set(key, value);
+      if (options?.ex) {
+        ttl.set(key, options.ex);
+      }
+      return true;
+    }),
     del: vi.fn(async (key: string) => {
       const existed = store.has(key);
       store.delete(key);
+      ttl.delete(key);
       return existed ? 1 : 0;
     }),
     exists: vi.fn(async (key: string) => store.has(key)),

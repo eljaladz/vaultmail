@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-type TurnstileAction = 'admin-login' | 'domain-request' | 'api-access';
+type TurnstileAction = 'admin-login' | 'domain-request' | 'api-access' | 'api-key-request';
 
 interface TurnstileWidgetProps {
   siteKey: string;

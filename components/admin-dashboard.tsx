@@ -29,6 +29,7 @@ import { ImapSection } from './admin/imap-section';
 import { TelegramSection } from './admin/telegram-section';
 import { RetentionSection } from './admin/retention-section';
 import { ApiKeysSection } from './admin/api-keys-section';
+import { ApiKeyRequestsSection } from '@/components/admin/api-key-requests-section';
 import { DonationSection } from './admin/donation-section';
 import { DomainRequestsSection } from './admin/domain-requests-section';
 import { DomainSettingsSection } from './admin/domain-settings-section';
@@ -533,6 +534,10 @@ export function AdminDashboard() {
                 } catch {}
               }}
             />
+
+            <hr className="border-white/10 my-2" />
+
+            <ApiKeyRequestsSection />
 
             <hr className="border-white/10 my-2" />
 

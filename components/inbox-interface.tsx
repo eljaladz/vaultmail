@@ -513,9 +513,10 @@ export function InboxInterface({ initialAddress, locale, retentionLabel, initial
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative flex-1 min-w-[120px]">
+        <div className="flex flex-col gap-3 md:gap-2">
+          {/* Email Address Section */}
+          <div className="flex items-center gap-1 md:gap-2 w-full">
+            <div className="relative flex-1 min-w-0">
               <Input 
                       value={address.split('@')[0] || ''}
                       onChange={(e) => {
@@ -525,14 +526,14 @@ export function InboxInterface({ initialAddress, locale, retentionLabel, initial
                           localStorage.setItem('dispo_address', `${val}@${currentDomain}`);
                       }}
                       onBlur={() => addToHistory(address)}
-                      className="pr-4 font-mono text-base md:text-lg bg-black/20 border-white/10 h-10 md:h-12"
+                      className="px-2 md:px-4 font-mono text-sm md:text-lg bg-black/20 border-white/10 h-10 md:h-12 w-full truncate"
                       placeholder={t.usernamePlaceholder}
                   />
             </div>
             <div className="relative flex items-center shrink-0">
-                 <span className="text-muted-foreground text-base md:text-lg px-2">@</span>
+                 <span className="text-muted-foreground text-sm md:text-lg px-0.5 md:px-2">@</span>
             </div>
-             <div className="relative max-w-[calc(100vw-2rem)] md:max-w-[250px] shrink-0">
+             <div className="relative flex-1 min-w-0 max-w-[50%] md:max-w-[250px] shrink-0">
                  <DomainSelector
                     domains={systemDomains}
                     selectedDomain={domain}
@@ -549,47 +550,58 @@ export function InboxInterface({ initialAddress, locale, retentionLabel, initial
                     setShowDomainMenu={setShowDomainMenu}
                  />
              </div>
+          </div>
+          
+          {/* Action Buttons Section */}
+          <div className="flex w-full items-center justify-between md:justify-start gap-2">
              <button
                type="button"
                onClick={() => setShowRequestModal(true)}
-               className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 h-10 md:h-12 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+               className="flex-1 md:flex-none inline-flex justify-center items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2 md:px-3 h-10 md:h-12 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
                title="Request a new domain"
              >
                <Plus className="h-4 w-4" />
-               <span className="hidden sm:inline">Request domain</span>
+               <span className="hidden md:inline">Request domain</span>
              </button>
-  {showRequestModal && (
-    <RequestDomainModal onClose={() => setShowRequestModal(false)} />
-  )}
-            <HistoryDropdown
-                history={history}
-                activeAddress={address}
-                show={showHistory}
-                setShow={setShowHistory}
-                hasEmails={emails.length > 0}
-                t={t}
-                onClearAll={() => {
-                    setHistory([]);
-                    localStorage.removeItem('dispo_history');
-                }}
-                onRestore={(histAddr) => {
-                    setAddress(histAddr);
-                    const parts = histAddr.split('@');
-                    if(parts[1]) setDomain(parts[1]);
-                    localStorage.setItem('dispo_address', histAddr);
-                    setShowHistory(false);
-                }}
-                onRemove={(histAddr) => {
-                    const newHist = history.filter(h => h !== histAddr);
-                    setHistory(newHist);
-                    localStorage.setItem('dispo_history', JSON.stringify(newHist));
-                }}
-            />
-            <Button onClick={copyAddress} variant="secondary" size="lg" className="h-10 md:h-12 shrink-0">
-              <Copy className="mr-2 h-4 w-4" /> {t.copy}
+            {showRequestModal && (
+              <RequestDomainModal onClose={() => setShowRequestModal(false)} />
+            )}
+            
+            <div className="flex items-center justify-center flex-1 md:flex-none">
+              <HistoryDropdown
+                  history={history}
+                  activeAddress={address}
+                  show={showHistory}
+                  setShow={setShowHistory}
+                  hasEmails={emails.length > 0}
+                  t={t}
+                  onClearAll={() => {
+                      setHistory([]);
+                      localStorage.removeItem('dispo_history');
+                  }}
+                  onRestore={(histAddr) => {
+                      setAddress(histAddr);
+                      const parts = histAddr.split('@');
+                      if(parts[1]) setDomain(parts[1]);
+                      localStorage.setItem('dispo_address', histAddr);
+                      setShowHistory(false);
+                  }}
+                  onRemove={(histAddr) => {
+                      const newHist = history.filter(h => h !== histAddr);
+                      setHistory(newHist);
+                      localStorage.setItem('dispo_history', JSON.stringify(newHist));
+                  }}
+              />
+            </div>
+            
+            <Button onClick={copyAddress} variant="secondary" size="lg" className="flex-1 md:flex-none h-10 md:h-12 px-2 md:px-4">
+              <Copy className="md:mr-2 h-4 w-4" /> 
+              <span className="hidden md:inline">{t.copy}</span>
             </Button>
-            <Button onClick={generateAddress} variant="outline" size="lg" className="h-10 md:h-12 border-white/10 hover:bg-white/5 shrink-0">
-              <RefreshCw className="mr-2 h-4 w-4" /> {t.newAlias}
+            
+            <Button onClick={generateAddress} variant="outline" size="lg" className="flex-1 md:flex-none h-10 md:h-12 px-2 md:px-4 border-white/10 hover:bg-white/5">
+              <RefreshCw className="md:mr-2 h-4 w-4" /> 
+              <span className="hidden md:inline">{t.newAlias}</span>
             </Button>
           </div>
           <div className="text-xs text-muted-foreground">

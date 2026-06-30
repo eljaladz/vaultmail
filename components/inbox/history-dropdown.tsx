@@ -76,7 +76,7 @@ export function HistoryDropdown({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.96 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 z-[70] mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-2xl overflow-hidden"
+            className="absolute left-1/2 z-[70] mt-2 w-80 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-2xl overflow-hidden md:left-auto md:right-0 md:translate-x-0"
           >
             <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-white/10">
               <span className="text-xs font-bold tracking-wider uppercase text-white/50">{t.historyTitle}</span>
