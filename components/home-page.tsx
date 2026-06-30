@@ -5,26 +5,22 @@ import { NavMenu } from '@/components/nav-menu'
 import { Shield, Zap, Globe } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import {
-  DEFAULT_LOCALE,
-  getRetentionOptions,
-  getTranslations,
-  Locale,
-  SUPPORTED_LOCALES,
-} from '@/lib/i18n'
-import { DEFAULT_APP_NAME } from '@/lib/branding'
-import { apiFetch } from '@/lib/client/api-fetch'
+import { DEFAULT_LOCALE, getRetentionOptions, getTranslations, Locale, SUPPORTED_LOCALES } from '@/lib/i18n'
 
 interface HomePageProps {
   initialAddress?: string
+  appName?: string | null
+  retentionSeconds?: number
+  initialDomains?: string[]
 }
 
 const STORAGE_KEY = 'vaultmail_locale'
 
-export function HomePage({ initialAddress }: HomePageProps) {
+export function HomePage({ initialAddress, appName, retentionSeconds: initialRetention, initialDomains }: HomePageProps) {
   const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE)
-  const [retentionSeconds, setRetentionSeconds] = useState(86400)
-  const [customAppName, setCustomAppName] = useState<string | null>(null)
+  const [retentionSeconds] = useState(initialRetention ?? 86400)
+  const [customAppName] = useState<string | null>(appName ?? null)
+  const [domains] = useState<string[]>(initialDomains ?? [])
 
   // Load app name logic
   useEffect(() => {
@@ -52,39 +48,6 @@ export function HomePage({ initialAddress }: HomePageProps) {
       ?.label ||
     retentionOptions[2]?.label ||
     '24 Hours'
-
-  useEffect(() => {
-    const loadRetention = async () => {
-      try {
-        const response = await apiFetch('/api/retention')
-        if (!response.ok) return
-        const data = (await response.json()) as { seconds?: number }
-        if (data?.seconds) {
-          setRetentionSeconds(data.seconds)
-        }
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    loadRetention()
-  }, [])
-
-  useEffect(() => {
-    const loadBranding = async () => {
-      try {
-        const response = await apiFetch('/api/branding')
-        if (!response.ok) return
-        const data = (await response.json()) as { appName?: string }
-        const value = data?.appName?.trim()
-        setCustomAppName(value || DEFAULT_APP_NAME)
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    loadBranding()
-  }, [])
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours()
@@ -145,6 +108,7 @@ export function HomePage({ initialAddress }: HomePageProps) {
           initialAddress={initialAddress}
           locale={locale}
           retentionLabel={retentionLabel}
+          initialDomains={domains}
         />
 
         {/* Features Grid */}

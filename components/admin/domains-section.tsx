@@ -112,7 +112,7 @@ export function DomainsSection({
           onClick={cancelDelete}
         >
           <div
-            className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-6 text-white shadow-xl"
+            className="w-full max-w-sm rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl p-6 text-white shadow-xl"
             onClick={(event) => event.stopPropagation()}
           >
             <h3 className="text-base md:text-lg font-semibold text-white">Delete Domain</h3>

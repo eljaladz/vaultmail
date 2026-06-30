@@ -80,7 +80,7 @@ export function DonationFloatingButton({ evmAddress, message }: DonationFloating
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-4 md:p-6 text-white shadow-xl"
+            className="w-full max-w-sm rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl p-4 md:p-6 text-white shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">

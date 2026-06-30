@@ -92,49 +92,13 @@ const parseCookieValue = (cookieHeader: string, name: string): string | null => 
   return null;
 };
 
-type RateLimitWindow = {
-  count: number;
-  resetAt: string;
-};
-
-const parseRateLimitWindow = (value: unknown): RateLimitWindow | null => {
-  if (!value || typeof value !== 'object') {
-    if (typeof value === 'number') {
-      return { count: value, resetAt: new Date(0).toISOString() };
-    }
-    return null;
-  }
-  const candidate = value as Partial<RateLimitWindow>;
-  if (typeof candidate.count !== 'number') return null;
-  if (typeof candidate.resetAt !== 'string') return null;
-  return candidate as RateLimitWindow;
-};
-
 const checkRateLimitByKey = async (
   key: string,
   max: number,
   windowSeconds: number
 ): Promise<boolean> => {
-  const now = Date.now();
-  const current = parseRateLimitWindow(await storage.get(key));
-  const currentResetAt = current ? Date.parse(current.resetAt) : 0;
-
-  if (!current || !Number.isFinite(currentResetAt) || currentResetAt <= now) {
-    const resetAt = new Date(now + windowSeconds * 1000).toISOString();
-    await storage.set(key, { count: 1, resetAt }, { ex: windowSeconds });
-    return false;
-  }
-
-  const next = current.count + 1;
-  const remainingSeconds = Math.max(1, Math.ceil((currentResetAt - now) / 1000));
-
-  await storage.set(
-    key,
-    { count: next, resetAt: current.resetAt },
-    { ex: remainingSeconds }
-  );
-
-  return next > max;
+  const result = await storage.atomicIncrement(key, { ex: windowSeconds });
+  return result.count > max;
 };
 
 const getIdentityHash = (mode: AuthMode, request: Request, apiKeyToken?: string, sessionToken?: string): string => {

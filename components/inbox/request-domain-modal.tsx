@@ -74,7 +74,7 @@ export function RequestDomainModal({ onClose, nameservers }: RequestDomainModalP
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-2xl border border-white/10 bg-zinc-900 p-4 md:p-6 text-white shadow-xl max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-md rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl p-4 md:p-6 text-white shadow-xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">

@@ -106,9 +106,9 @@ export async function GET(req: Request) {
   try {
     await cleanupExpiredMessages(address);
 
-    const existing = await storage.lrange(inboxKey(address), 0, -1);
+    let emails = await storage.lrange(inboxKey(address), 0, -1);
     const existingSourceIds = new Set(
-      (existing || [])
+      (emails || [])
         .map((item) => (item && typeof item === 'object' ? (item as { sourceId?: string }).sourceId : undefined))
         .filter((value): value is string => Boolean(value))
     );
@@ -135,22 +135,24 @@ export async function GET(req: Request) {
       const ts = new Date(email.receivedAt).getTime();
       return Number.isFinite(ts) && ts >= thresholdMs;
     });
+    let emailsUpdated = false;
     if (freshImapEmails.length > 0) {
-      const current = await storage.lrange(inboxKey(address), 0, -1);
-      const known = new Set(
-        (current || [])
-          .map((item) => (item && typeof item === 'object' ? (item as { sourceId?: string }).sourceId : undefined))
-          .filter((value): value is string => Boolean(value))
-      );
+      let addedAny = false;
       for (const email of freshImapEmails) {
-        if (known.has(email.sourceId)) continue;
+        if (existingSourceIds.has(email.sourceId)) continue;
         await storage.lpush(inboxKey(address), email);
-        known.add(email.sourceId);
+        existingSourceIds.add(email.sourceId);
+        addedAny = true;
       }
-      await storage.expire(inboxKey(address), retentionSeconds);
+      if (addedAny) {
+        await storage.expire(inboxKey(address), retentionSeconds);
+        emailsUpdated = true;
+      }
     }
 
-    const emails = await storage.lrange(inboxKey(address), 0, -1);
+    if (emailsUpdated) {
+      emails = await storage.lrange(inboxKey(address), 0, -1);
+    }
     const normalizedEmails = (emails || []).map(normalizeEmailPayload);
     return NextResponse.json({ emails: normalizedEmails, imapDebug: imapResult.debug }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {

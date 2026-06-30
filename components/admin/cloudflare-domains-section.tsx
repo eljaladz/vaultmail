@@ -466,7 +466,7 @@ export function CloudflareDomainsSection({ onDomainAdded }: CloudflareDomainsSec
           onClick={() => { setConfirmFullRemove(null); setFullRemoveInput(''); }}
         >
           <div
-            className="w-full max-w-sm rounded-2xl border border-red-500/30 bg-zinc-900 p-6 text-white shadow-xl"
+            className="w-full max-w-sm rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl p-6 text-white shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-2 mb-3">
@@ -509,7 +509,7 @@ export function CloudflareDomainsSection({ onDomainAdded }: CloudflareDomainsSec
           onClick={() => setConfirmCancel(null)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-6 text-white shadow-xl"
+            className="w-full max-w-sm rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl p-6 text-white shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-base font-semibold text-white">Cancel Onboarding</h3>

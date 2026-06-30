@@ -11,13 +11,27 @@ import {
   createHomepageSession,
 } from "@/lib/homepage-session";
 import { getStoredAppName } from "@/lib/branding-settings";
+import { getDomains } from "@/lib/domains";
+import { storage } from "@/lib/storage";
+import { RETENTION_SETTINGS_KEY } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
+const getRetentionSeconds = async (): Promise<number> => {
+  const raw = await storage.get(RETENTION_SETTINGS_KEY);
+  if (raw && typeof raw === 'object') {
+    const val = raw as { seconds?: number };
+    if (typeof val.seconds === 'number') return val.seconds;
+  }
+  return 86400;
+};
+
 export default async function Home() {
-  const [settings, appName] = await Promise.all([
+  const [settings, appName, retentionSeconds, domains] = await Promise.all([
     getHomepageLockSettings(),
     getStoredAppName(),
+    getRetentionSeconds(),
+    getDomains(),
   ]);
 
   const cookieStore = await cookies();
@@ -25,11 +39,11 @@ export default async function Home() {
 
   if (sessionCookie?.value) {
     const valid = await validateHomepageSession(sessionCookie.value);
-    if (valid) return <HomePage />;
+    if (valid) return <HomePage appName={appName} retentionSeconds={retentionSeconds} initialDomains={domains} />;
   }
 
   if (!settings.enabled || !settings.passwordHash) {
-    return <HomePage />;
+    return <HomePage appName={appName} retentionSeconds={retentionSeconds} initialDomains={domains} />;
   }
 
   const oldCookie = cookieStore.get(HOMEPAGE_LOCK_COOKIE);
@@ -43,7 +57,7 @@ export default async function Home() {
       path: '/',
     });
     cookieStore.delete(HOMEPAGE_LOCK_COOKIE);
-    return <HomePage />;
+    return <HomePage appName={appName} retentionSeconds={retentionSeconds} initialDomains={domains} />;
   }
 
   return <HomepageLock appName={appName} />;

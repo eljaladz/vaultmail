@@ -32,6 +32,14 @@ docker run -d \
 
 Connection string: `mongodb://localhost:27017`
 
+### Step 3: Create Database Indexes
+
+Run the setup script to create database indexes required for performant queries (e.g. compound index for inbox listing):
+
+```bash
+MONGODB_URI="your-mongodb-connection-string" node scripts/create-indexes.mjs
+```
+
 ---
 
 ## Phase 2: Netlify Deployment

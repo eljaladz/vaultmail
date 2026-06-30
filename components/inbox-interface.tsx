@@ -20,9 +20,10 @@ interface InboxInterfaceProps {
     initialAddress?: string;
     locale?: Locale;
     retentionLabel?: string;
+    initialDomains?: string[];
 }
 
-export function InboxInterface({ initialAddress, locale, retentionLabel }: InboxInterfaceProps) {
+export function InboxInterface({ initialAddress, locale, retentionLabel, initialDomains }: InboxInterfaceProps) {
   const t = getTranslations(locale);
   const normalizeDomains = useCallback(
     (domains: string[]) =>
@@ -35,7 +36,7 @@ export function InboxInterface({ initialAddress, locale, retentionLabel }: Inbox
   const [loading, setLoading] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [autoRefresh] = useState(true);
-  const [systemDomains, setSystemDomains] = useState<string[]>([]);
+  const [systemDomains, setSystemDomains] = useState<string[]>(initialDomains ?? []);
   const [history, setHistory] = useState<string[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [showDomainMenu, setShowDomainMenu] = useState(false);
@@ -332,6 +333,7 @@ export function InboxInterface({ initialAddress, locale, retentionLabel }: Inbox
   }, []);
 
   useEffect(() => {
+    if (initialDomains !== undefined) return;
     let active = true;
     const loadDomains = async () => {
       try {
@@ -355,7 +357,7 @@ export function InboxInterface({ initialAddress, locale, retentionLabel }: Inbox
     return () => {
       active = false;
     };
-  }, [normalizeDomains]);
+  }, [normalizeDomains, initialDomains]);
 
   useEffect(() => {
     const updateDomain = () => {
